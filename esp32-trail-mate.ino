@@ -11,7 +11,7 @@
 
 #define SCAN_TIME 1     // seconds
 #define SCAN_INTERVAL 2   //seconds
-#define MINIMUM_RSSI -100  // ignores devices with weaker signal
+#define MINIMUM_RSSI -100  // ignores devices with weaker signal - increasing it to -55 will limit the scan range to around 1m-2m
 
 BLEScan* pBLEScan = nullptr;
 
@@ -23,8 +23,10 @@ const char *ssid = "";
 const char *password = "";
 const char *ntpServer = "pool.ntp.org"; // NTP server to fetch time from
 
-const unsigned long MAC_ENTRY_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
-
+const unsigned long MAC_ENTRY_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds, if you want to filter unique MACs for a longer period, you can increase the first value
+/*
+  @brief Struct that stores unique MAC with the apperance timestamp.
+*/
 struct MacEntry {
   std::string macAddress;
   unsigned long timestamp;
@@ -35,8 +37,18 @@ LinkedList<MacEntry> macList;
 WiFiUDP ntpUDP; // Create an instance of WiFiUDP to handle NTP requests
 NTPClient timeClient(ntpUDP, ntpServer); // Create an instance of NTPClient
 
+/*
+  @brief A function that checks if the MAC address has appeared within the given period. If not, it stores it in a linked list.
+*/
 void addUniqueMacAddress(const String& mac);
+
+/*
+  @brief Prints a list of recent MAC addresses along with the time of their appearance.
+*/
 void printMacList();
+/*
+  @brief Function checks if the MAC address in the linked list got outdated. If so, it deletes it.
+*/
 void deleteOutdatedEntries();
 
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
@@ -49,6 +61,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
 };
 
 void addUniqueMacAddress(const String& mac) {
+  // Check if MAC already present
   for (int i = 0; i < macList.size(); i++) {
     if (macList.get(i).macAddress == mac.c_str()) {
       return;
@@ -93,8 +106,8 @@ void setup() {
 
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan(); //create new scan
-  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks(), false);
-  pBLEScan->setActiveScan(true);
+  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks(), false); //create callback
+  pBLEScan->setActiveScan(true); // Set the active scan flag
   pBLEScan->setInterval(SCAN_INTERVAL); // Set the scanning interval to the desired value
   pBLEScan->setWindow(SCAN_INTERVAL - 2); // Set the scanning window slightly less than the interval
 
