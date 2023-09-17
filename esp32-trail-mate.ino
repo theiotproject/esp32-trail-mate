@@ -29,11 +29,8 @@ int count = 0;
 
 BLEScan* pBLEScan = nullptr;
 
-char jsonBuffer[2048]; 
-
 const u_int ledPin = 2; 
 
-const char *trail_id = "MaM0rb1liG1C1cWIouKR";
 const char *ssid = "ResetHack";
 const char *password = "BBDays2023";
 const char *ntpServer = "pool.ntp.org"; // NTP server to fetch time from
@@ -43,7 +40,7 @@ const char *user_emali = "jan.kowalski@poczta.pl";
 const char *user_password = "haslo123";
 
 const unsigned long MAC_ENTRY_TIMEOUT = 60 * 60 * 1000; // 15 minutes in milliseconds
-unsigned int events_counter = 0;
+int events_counter = 0;
 
 struct MacEntry {
   std::string macAddress;
@@ -163,13 +160,13 @@ void printMacList() {
     Serial.printf("MAC: %s, TMSTMP: %s\n", macList.get(i).macAddress.c_str(), formattedTime);
   }
 }
-void firestoreDataUpdate(unsigned int events_counter){
+void firestoreDataUpdate(){
   if(WiFi.status() == WL_CONNECTED && Firebase.ready()){
-    String documentPath = "trails/" + trail_id;
+    String documentPath = "trails/MaM0rb1liG1C1cWIouKR"; // hard coded trail_id (stefanka)
 
     FirebaseJson content;
 
-    content.set("fields/events/intValue", String(events_counter).c_str());
+    content.set("fields/events/doubleValue", String(events_counter).c_str());
 
     if(Firebase.Firestore.patchDocument(&fbdo, firebase_project_id, "", documentPath.c_str(), content.raw(), "events")){
       Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
@@ -192,5 +189,5 @@ void loop() {
   pBLEScan->clearResults();
   printMacList();
   deleteOutdatedEntries();
-  firestoreDataUpdate(events_counter);
+  firestoreDataUpdate();
 }
