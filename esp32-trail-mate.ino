@@ -2,7 +2,6 @@
 #include <BLEUtils.h>
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
-#include <dummy.h>
 #include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
@@ -31,16 +30,16 @@ BLEScan* pBLEScan = nullptr;
 
 const u_int ledPin = 2; 
 
-const char *ssid = "ResetHack";
-const char *password = "BBDays2023";
+const char *wifi_ssid = "ResetHack";
+const char *wifi_password = "BBDays2023";
 const char *ntpServer = "pool.ntp.org"; // NTP server to fetch time from
-const char *api_key = "AIzaSyDs0YZEfpDS0jKQpMSxoEuCSgXRhYzarpM";
+const char *api_key = "";
 const char *firebase_project_id = "endurobb-db";
 const char *user_emali = "jan.kowalski@poczta.pl";
 const char *user_password = "haslo123";
 
 
-const unsigned long MAC_ENTRY_TIMEOUT = 60 * 60 * 1000; // 15 minutes in milliseconds
+const unsigned long MAC_ENTRY_TIMEOUT = 60 * 60 * 1000; // 1h in milliseconds
 int events_counter = 0;
 
 /*
@@ -110,7 +109,7 @@ void deleteOutdatedEntries() {
 void setup() {
   Serial.begin(115200);
 
-  WiFi.begin(ssid, password);
+  WiFi.begin(wifi_ssid, wifi_password);
 
   Serial.print("Connecting to Wi-Fi");
   unsigned long ms = millis();
